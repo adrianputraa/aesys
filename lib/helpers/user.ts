@@ -1,4 +1,4 @@
-import { db } from '@/lib/server/database';
+import { db } from '@/lib/database';
 
 const USER_ROLE_LEVEL = {
   USER: 1,

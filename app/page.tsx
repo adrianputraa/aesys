@@ -9,7 +9,6 @@ type Props = {
 
 export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
   // const slug = (await params).slug;
-
   // fetch post information
   // const post = await fetch(`https://api.vercel.app/blog/${slug}`).then((res) => res.json());
 

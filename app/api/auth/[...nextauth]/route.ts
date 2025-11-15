@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { db } from '@/lib/server/database';
-import { UserTableRow } from '@/lib/server/database/schema';
+import { db } from '@/lib/database';
+import { UserTableRow } from '@/lib/database/schema';
 import { sql } from 'drizzle-orm';
 import { compareString } from '@/lib/helpers/encrypt';
 
