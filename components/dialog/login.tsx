@@ -17,9 +17,7 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 export default function LoginDialog() {
   const { status } = useSession();
   const isAuthenticated = status === 'authenticated';
-
   const [open, setOpen] = useState(false);
-
   const handleLogout = async () => {
     await signOut();
   };

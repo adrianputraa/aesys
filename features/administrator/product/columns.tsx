@@ -8,18 +8,29 @@ import { ColumnDef } from '@tanstack/react-table';
 export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: 'name',
-    header: 'Name',
-  },
-  {
-    accessorKey: 'price',
-    header: 'Price',
+    header: () => <div className="text-left">Name</div>,
   },
   {
     accessorKey: 'stock',
-    header: 'Stock',
+    header: () => <div className="text-center">Stock</div>,
+    cell: ({ row }) => <div className="text-center">{parseFloat(row.getValue('stock'))}</div>,
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: () => <div className="text-center">Status</div>,
+    cell: ({ row }) => <div className="text-center">{row.getValue('status')}</div>,
+  },
+  {
+    accessorKey: 'price',
+    header: () => <div className="text-right">Price</div>,
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue('price'));
+      const formatted = new Intl.NumberFormat('id', {
+        style: 'currency',
+        currency: 'IDR',
+      }).format(amount);
+
+      return <div className="text-right font-medium">{formatted}</div>;
+    },
   },
 ];

@@ -9,7 +9,7 @@ type Product = {
   sku: string;
   barcode: string | null;
   status: ProductStatus;
-  categoryId: number;
+  categoryId: number | null;
   createdBy: number;
   createdAt: string;
   updatedAt: string;

@@ -1,6 +1,7 @@
 'use client';
 
 import { handleFetch } from '@/lib/api';
+import { api } from '@/lib/helpers/query';
 import { useQuery } from '@tanstack/react-query';
 
 type ProductQueryOptions = Partial<{
@@ -15,11 +16,24 @@ export const useProductQuery = (options?: ProductQueryOptions) => {
   return useQuery({
     queryKey: ['product', ...optionalKeys],
     queryFn: async () => {
-      const result = await handleFetch<Product[]>('/api/products', {
-        method: 'GET',
-      });
+      const queryUrl = new URL('/api/products', 'http://localhost:3000');
+      if (options?.name) {
+        queryUrl.searchParams.set('q', options?.name);
+      }
 
-      return result || [];
+      const { data } = await api.get<Product[]>(queryUrl.toString());
+      return data || [];
+    },
+  });
+};
+
+export const useProductCategoryQuery = () => {
+  return useQuery({
+    queryKey: ['productCategory'],
+    queryFn: async () => {
+      const { data } = await api.get<ProductCategoryQueryResult[]>('/api/categories/product');
+
+      return data ?? [];
     },
   });
 };

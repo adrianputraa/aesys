@@ -19,19 +19,15 @@ export const { handler, auth, signIn, signOut } = NextAuth({
         }
 
         const user = await db.get<UserTableRow>(sql`
-          SELECT id, email, password
+          SELECT id, email, username, password
           FROM users
           WHERE email = ${credentials.email}
         `);
 
-        if (!user) {
-          return null;
-        }
+        if (!user) return null;
 
         const isValid = await compareString(credentials.password, user.password);
-        if (!isValid) {
-          return null;
-        }
+        if (!isValid) return null;
 
         return {
           id: String(user.id),
@@ -44,31 +40,31 @@ export const { handler, auth, signIn, signOut } = NextAuth({
 
   session: {
     strategy: 'jwt',
-    maxAge: 60 * 60 * 24 * 365, // 1 year in seconds
+    maxAge: 60 * 60 * 24 * 365,
   },
 
   jwt: {
-    maxAge: 60 * 60 * 24 * 365, // optional, sync JWT expiry with session
+    maxAge: 60 * 60 * 24 * 365,
   },
 
   pages: {
-    signIn: '/auth/login', // your existing login page
+    signIn: '/auth/login',
   },
 
   callbacks: {
-    jwt: async ({ token, user }) => {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.name = user.name;
         token.email = user.email;
+        token.username = user.username;
       }
-
       return token;
     },
+
     async session({ session, token }) {
-      // Only mutate if both exist
-      if (session?.user && token?.id) {
+      if (session.user) {
         session.user.id = token.id as string;
+        session.user.email = token.email as string; // <-- FIX
       }
 
       return session;

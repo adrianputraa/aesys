@@ -8,12 +8,6 @@ const GENERIC_MESSAGE = [
   { code: 200, message: 'Successful.' },
 ] as const;
 
-type ApiResponse<T> = {
-  code: number;
-  message: string;
-  data: T | null;
-};
-
 async function sendApiResponse<T>(code: number, data: T | null = null, message?: string): Promise<NextResponse> {
   const genericMessage = GENERIC_MESSAGE.find((res) => res.code === code)?.message ?? 'Unknown Response';
   const responsePayload = {
@@ -28,13 +22,8 @@ async function sendApiResponse<T>(code: number, data: T | null = null, message?:
   });
 }
 
-async function getApiPostBody<T>(req: NextRequest): Promise<T | undefined> {
-  try {
-    const body = (await req.json()) as T | undefined;
-    return body;
-  } catch (error) {
-    return undefined;
-  }
+async function getApiPostBody<T>(request: NextRequest): Promise<T | null> {
+  return request.json() as T | null;
 }
 
 async function handleFetch<T>(url: string, options: RequestInit): Promise<ApiResponse<T>> {
@@ -59,13 +48,13 @@ async function handleFetch<T>(url: string, options: RequestInit): Promise<ApiRes
   } catch (error) {
     console.error(error);
 
-    // If it's already an ApiResponse object, rethrow it
-    if (typeof error === 'object' && error !== null && 'code' in error && 'message' in error) {
-      return error as ApiResponse<T>;
+    // If it's already an ApiResponse, rethrow so mutation catches it
+    if (typeof error === 'object' && error !== null && 'code' in error) {
+      throw error; // <---- IMPORTANT
     }
 
-    // Otherwise, fallback to a client-side error
-    return {
+    // Fallback error
+    throw {
       code: 500,
       message: 'Client-side error',
       data: null,
@@ -73,5 +62,17 @@ async function handleFetch<T>(url: string, options: RequestInit): Promise<ApiRes
   }
 }
 
-export { getApiPostBody, sendApiResponse, handleFetch };
-export type { ApiResponse };
+type GetSearchParams = {
+  (req: NextRequest, name: string): string[];
+  (req: NextRequest, name: string, mode: 'ALL'): string[];
+  (req: NextRequest, name: string, mode: 'SINGLE'): string | null;
+};
+
+const getApiSearchParams = ((req: NextRequest, name: string, mode: 'SINGLE' | 'ALL' = 'ALL') => {
+  if (mode === 'SINGLE') {
+    return req.nextUrl.searchParams.get(name);
+  }
+  return req.nextUrl.searchParams.getAll(name);
+}) as GetSearchParams;
+
+export { getApiPostBody, getApiSearchParams, sendApiResponse, handleFetch };

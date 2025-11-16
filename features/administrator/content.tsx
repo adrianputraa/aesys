@@ -2,10 +2,8 @@
 
 import { Fragment } from 'react/jsx-runtime';
 import AdministratorPageHeader from './header';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BoxesIcon, PlusIcon, Users2Icon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users2Icon } from 'lucide-react';
 import { ProductContent, ProductTrigger } from './product';
 
 export default function AdministratorPageContent() {

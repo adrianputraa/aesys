@@ -2,7 +2,6 @@
 
 import { Spinner } from '@/components/ui/spinner';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 const AdminsitatorPageContent = dynamic(() => import('@/features/administrator/content'), {
@@ -12,7 +11,6 @@ const AdminsitatorPageContent = dynamic(() => import('@/features/administrator/c
 
 export default function AdministratorPage() {
   const { status } = useSession();
-  const router = useRouter();
 
   if (status === 'loading') {
     return (

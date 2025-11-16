@@ -89,6 +89,7 @@ export default function AuthLoginForm({ ...props }: Props) {
 
   const [revealPassword, setRevealPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
+
   const disableInteraction = isPending;
   const isLoading = status === 'loading';
   const isAuthenticated = status === 'authenticated';
