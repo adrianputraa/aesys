@@ -1,8 +1,9 @@
+import LoadingProgressProvider from '@/components/misc/loading';
+import { Toaster } from '@/components/ui/sonner';
+import QueryProvider from '@/lib/providers/query-client';
+import SessionProvider from '@/lib/providers/user-session';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import SessionProvider from '@/lib/providers/user-session';
-import QueryProvider from '@/lib/providers/query-client';
-import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
 const geistSans = Geist({
@@ -30,8 +31,10 @@ export default function RootLayout({
       <SessionProvider>
         <QueryProvider>
           <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-            {children}
-            <Toaster />
+            <LoadingProgressProvider>
+              {children}
+              <Toaster />
+            </LoadingProgressProvider>
           </body>
         </QueryProvider>
       </SessionProvider>
