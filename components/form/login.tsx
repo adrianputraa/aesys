@@ -1,20 +1,20 @@
 'use client';
 
+import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeftIcon, EyeClosed, EyeIcon, KeyIcon, LogInIcon, MailIcon } from 'lucide-react';
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText } from '../ui/input-group';
-import { Button } from '../ui/button';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import LinkText from '../typography/link';
 import ParagraphText from '../typography/paragraph';
-import { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { LoginFormSchema, loginFormSchema } from './schema/auth';
+import { Button } from '../ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '../ui/field';
-import { cn } from '@/lib/utils';
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText } from '../ui/input-group';
 import { Spinner } from '../ui/spinner';
-import { useRouter } from 'next/navigation';
-import { signIn, useSession } from 'next-auth/react';
+import { LoginFormSchema, loginFormSchema } from './schema/auth';
 
 interface Props {
   isModal?: boolean;
@@ -24,6 +24,7 @@ interface Props {
 
 export default function AuthLoginForm({ ...props }: Props) {
   const { status } = useSession();
+  const [loginInvalid, setLoginInvalid] = useState(false);
   const router = useRouter();
 
   const form = useForm({
@@ -57,8 +58,11 @@ export default function AuthLoginForm({ ...props }: Props) {
         onChangeUrl();
         router.push('/dashboard');
       }
+
+      setLoginInvalid(false);
     } catch (error) {
       console.error(error);
+      setLoginInvalid(true);
       throw error;
     } finally {
       setIsPending(false);
@@ -80,6 +84,8 @@ export default function AuthLoginForm({ ...props }: Props) {
   };
 
   const onSubmit = async (value: LoginFormSchema) => {
+    setLoginInvalid(false);
+
     toast.promise(formAction(value), {
       id: 'login_success',
       success: 'Successfully logged in!',
@@ -118,6 +124,7 @@ export default function AuthLoginForm({ ...props }: Props) {
       </div>
 
       <div id="form_body" className="space-y-2">
+        <p>isLoginInvalid: {loginInvalid ? 'TRUE' : 'FALSE'}</p>
         <FieldGroup>
           <Controller
             name="email"
@@ -130,10 +137,15 @@ export default function AuthLoginForm({ ...props }: Props) {
                   <FieldLabel htmlFor="form_input_email" className="hidden">
                     Email
                   </FieldLabel>
-                  <InputGroup className={cn({ 'text-red-600!': isInvalid })} aria-disabled={disableInteraction}>
-                    <InputGroupAddon align="block-start">
+                  <InputGroup
+                    className={cn({ 'text-red-600! border-red-600!': isInvalid || loginInvalid })}
+                    aria-disabled={disableInteraction}
+                  >
+                    <InputGroupAddon align="block-start" className={cn({ 'text-red-600!': isInvalid || loginInvalid })}>
                       <MailIcon />
-                      <InputGroupText>Email</InputGroupText>
+                      <InputGroupText className={cn({ 'text-red-600!': isInvalid || loginInvalid })}>
+                        Email
+                      </InputGroupText>
                       {isInvalid && <FieldError errors={[fieldState.error]} />}
                     </InputGroupAddon>
                     <InputGroupInput
@@ -142,6 +154,7 @@ export default function AuthLoginForm({ ...props }: Props) {
                       id="form_input_email"
                       autoComplete="email"
                       placeholder="Enter email address"
+                      className={cn('rounded-b-lg', { 'text-red-600!': isInvalid || loginInvalid })}
                       disabled={field.disabled || disableInteraction}
                       aria-invalid={isInvalid}
                       aria-disabled={disableInteraction}
@@ -160,14 +173,23 @@ export default function AuthLoginForm({ ...props }: Props) {
               const { invalid: isInvalid } = fieldState;
 
               return (
-                <Field data-invalid={isInvalid} aria-disabled={disableInteraction}>
+                <Field
+                  data-invalid={isInvalid}
+                  aria-disabled={disableInteraction}
+                  className={cn({ 'text-red-600!': isInvalid || loginInvalid })}
+                >
                   <FieldLabel htmlFor="input_password" className="hidden">
                     Password
                   </FieldLabel>
-                  <InputGroup aria-disabled={disableInteraction}>
-                    <InputGroupAddon align="block-start">
+                  <InputGroup
+                    aria-disabled={disableInteraction}
+                    className={cn({ 'text-red-600! border-red-600!': isInvalid || loginInvalid })}
+                  >
+                    <InputGroupAddon align="block-start" className={cn({ 'text-red-600!': isInvalid || loginInvalid })}>
                       <KeyIcon />
-                      <InputGroupText>Password</InputGroupText>
+                      <InputGroupText className={cn({ 'text-red-600!': isInvalid || loginInvalid })}>
+                        Password
+                      </InputGroupText>
                       {isInvalid && <FieldError errors={[fieldState.error]} />}
                     </InputGroupAddon>
                     <div className="w-full inline-flex">
@@ -176,6 +198,7 @@ export default function AuthLoginForm({ ...props }: Props) {
                         id="input_password"
                         type={revealPassword ? 'text' : 'password'}
                         placeholder="Enter your password"
+                        className="rounded-b-lg"
                         aria-invalid={isInvalid}
                         aria-disabled={disableInteraction}
                         disabled={disableInteraction}
