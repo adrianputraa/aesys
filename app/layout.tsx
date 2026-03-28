@@ -4,6 +4,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { DefaultLayout } from "@/lib/layout/default-layout"
 
 const interHeading = Inter({ subsets: ["latin"], variable: "--font-heading" })
 
@@ -36,7 +37,9 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
       )}
     >
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <DefaultLayout>{children}</DefaultLayout>
+        </Providers>
       </body>
     </html>
   )
