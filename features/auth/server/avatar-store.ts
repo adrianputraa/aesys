@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm"
 import type { ActionState } from "@/features/auth/types"
 import { db } from "@/lib/db/app"
 import { user as userTable } from "@/lib/db/app/auth-schema"
+import { compressImageToWebp } from "@/lib/image"
 import {
   deleteUserAvatar,
   detectImageExt,
@@ -49,19 +50,14 @@ export async function storeAvatar(
     }
   }
 
-  // Server-side compression guarantee: re-encode to a square WebP. `sharp` is
-  // imported lazily (native module kept out of the build graph).
+  // Server-side compression guarantee: re-encode to a square WebP via the
+  // shared image helper, so every stored avatar is small and normalized.
   let webp: Buffer
   try {
-    const { default: sharp } = await import("sharp")
-    webp = await sharp(input)
-      .rotate() // apply EXIF orientation
-      .resize(AVATAR_DIMENSION, AVATAR_DIMENSION, {
-        fit: "cover",
-        position: "centre",
-      })
-      .webp({ quality: 80 })
-      .toBuffer()
+    webp = await compressImageToWebp(input, {
+      maxDim: AVATAR_DIMENSION,
+      square: true,
+    })
   } catch {
     return { status: "error", message: "Could not process the image." }
   }
