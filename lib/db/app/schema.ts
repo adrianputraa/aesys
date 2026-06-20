@@ -7,3 +7,6 @@
  */
 export * from "./auth-schema"
 export * from "@/features/admin/schema"
+export * from "@/features/inventory/schema"
+export * from "@/features/shipping/schema"
+export * from "@/features/sales/schema"

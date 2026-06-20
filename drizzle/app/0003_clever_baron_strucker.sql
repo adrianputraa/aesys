@@ -1,0 +1,1 @@
+ALTER TABLE "currency" ADD COLUMN "type" text DEFAULT 'standard' NOT NULL;
