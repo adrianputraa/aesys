@@ -25,10 +25,6 @@ export default async function Page() {
           </Link>
         </Button>
       </div>
-
-      <p className="font-mono text-xs text-muted-foreground">
-        (Press <kbd>d</kbd> to toggle dark mode)
-      </p>
     </main>
   )
 }
