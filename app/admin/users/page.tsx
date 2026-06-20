@@ -133,7 +133,11 @@ export default async function AdminUsersPage({
               size="sm"
               disabled={page <= 1}
             >
-              {page > 1 ? <Link href={pageHref(page - 1)}>Previous</Link> : <span>Previous</span>}
+              {page > 1 ? (
+                <Link href={pageHref(page - 1)}>Previous</Link>
+              ) : (
+                <span>Previous</span>
+              )}
             </Button>
             <Button
               asChild={page < totalPages}
@@ -141,7 +145,11 @@ export default async function AdminUsersPage({
               size="sm"
               disabled={page >= totalPages}
             >
-              {page < totalPages ? <Link href={pageHref(page + 1)}>Next</Link> : <span>Next</span>}
+              {page < totalPages ? (
+                <Link href={pageHref(page + 1)}>Next</Link>
+              ) : (
+                <span>Next</span>
+              )}
             </Button>
           </div>
         </div>

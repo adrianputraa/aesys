@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  ArrowLeftIcon,
   LogOutIcon,
   SettingsIcon,
   ShieldIcon,
@@ -31,6 +32,8 @@ function initials(name: string): string {
 
 export function UserMenu({
   user,
+  align = "end",
+  appLinkHref,
 }: {
   user: {
     name: string
@@ -38,6 +41,10 @@ export function UserMenu({
     image?: string | null
     role?: string | null
   }
+  /** Dropdown alignment relative to the trigger. */
+  align?: "start" | "end"
+  /** When set, shows a "Back to app" item linking here (used in the admin shell). */
+  appLinkHref?: string
 }) {
   const [pending, startTransition] = useTransition()
   const isAdmin = isAdminRole(user.role)
@@ -63,7 +70,7 @@ export function UserMenu({
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align={align} className="w-56">
         <DropdownMenuLabel className="flex flex-col gap-0.5">
           <span className="truncate text-sm font-medium">{user.name}</span>
           <span className="truncate text-xs font-normal text-muted-foreground">
@@ -71,6 +78,14 @@ export function UserMenu({
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {appLinkHref ? (
+          <DropdownMenuItem asChild>
+            <Link href={appLinkHref}>
+              <ArrowLeftIcon />
+              Back to app
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem asChild>
           <Link href="/profile">
             <UserIcon />

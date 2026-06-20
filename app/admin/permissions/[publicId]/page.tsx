@@ -22,6 +22,7 @@ import {
   requirePermission,
   userHasPermission,
 } from "@/features/admin/server/permissions"
+import { listUserDirectory } from "@/features/admin/server/users"
 
 export const metadata: Metadata = { title: "Permission · Admin" }
 
@@ -45,6 +46,7 @@ export default async function PermissionDetailPage({
     acting.role,
     PERMISSIONS.MANAGE_PERMISSION
   )
+  const directory = canManage ? await listUserDirectory() : []
 
   return (
     <div className="flex flex-col gap-6">
@@ -118,19 +120,30 @@ export default async function PermissionDetailPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <GrantPermissionForm permissionPublicId={perm.publicId} />
+            <GrantPermissionForm
+              permissionPublicId={perm.publicId}
+              users={directory}
+            />
           </CardContent>
         </Card>
       ) : null}
 
       <p className="text-xs text-muted-foreground">
         Updated{" "}
-        <LocalTime value={perm.updatedAt} dateStyle="medium" timeStyle="short" />
+        <LocalTime
+          value={perm.updatedAt}
+          dateStyle="medium"
+          timeStyle="short"
+        />
         {perm.lastUpdatedBy
           ? ` by ${perm.lastUpdatedBy.name} (${perm.lastUpdatedBy.email})`
           : ""}{" "}
         · Created{" "}
-        <LocalTime value={perm.createdAt} dateStyle="medium" timeStyle="short" />
+        <LocalTime
+          value={perm.createdAt}
+          dateStyle="medium"
+          timeStyle="short"
+        />
       </p>
     </div>
   )

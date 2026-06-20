@@ -35,6 +35,40 @@ export async function resolveUserId(publicId: string): Promise<number | null> {
   return row?.id ?? null
 }
 
+export type UserDirectoryEntry = {
+  publicId: string
+  name: string
+  email: string
+  image: string | null
+}
+
+/**
+ * Lightweight directory of registered users for client-side pickers
+ * (`<UserPicker>`). Returns only client-safe fields, ordered by name. Capped
+ * defensively — accounts are admin-created, so the full set is small.
+ */
+export async function listUserDirectory(
+  limit = 1000
+): Promise<UserDirectoryEntry[]> {
+  const rows = await db
+    .select({
+      publicId: userTable.publicId,
+      name: userTable.name,
+      email: userTable.email,
+      image: userTable.image,
+    })
+    .from(userTable)
+    .orderBy(userTable.name)
+    .limit(Math.min(5000, Math.max(1, limit)))
+
+  return rows.map((r) => ({
+    publicId: r.publicId,
+    name: r.name,
+    email: r.email,
+    image: r.image ?? null,
+  }))
+}
+
 export type ListUsersParams = {
   search?: string
   searchField?: "name" | "email"
@@ -51,7 +85,10 @@ export async function listUsers(
   params: ListUsersParams
 ): Promise<ListUsersResult> {
   const page = Math.max(1, params.page ?? 1)
-  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? DEFAULT_PAGE_SIZE))
+  const pageSize = Math.min(
+    100,
+    Math.max(1, params.pageSize ?? DEFAULT_PAGE_SIZE)
+  )
 
   const conditions = []
   const query = params.search?.trim()

@@ -141,9 +141,7 @@ export default async function AdminUserDetailPage({
               {user.banned ? "Restricted" : "Active"}
             </DetailRow>
             {user.banned && user.banReason ? (
-              <DetailRow label="Restriction reason">
-                {user.banReason}
-              </DetailRow>
+              <DetailRow label="Restriction reason">{user.banReason}</DetailRow>
             ) : null}
             {user.banned && user.banExpires ? (
               <DetailRow label="Restriction expires">

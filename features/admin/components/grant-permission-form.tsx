@@ -1,8 +1,7 @@
 "use client"
 
-import { useActionState, useEffect, useRef, useState } from "react"
+import { useActionState, useState } from "react"
 
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -11,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { UserPicker, type PickerUser } from "@/components/user-picker"
 import { grantPermissionAction } from "@/features/admin/server/actions"
 import { FormField } from "@/features/auth/components/form-field"
 import { FormMessage } from "@/features/auth/components/form-message"
@@ -19,37 +19,52 @@ import { idleActionState } from "@/features/auth/types"
 
 export function GrantPermissionForm({
   permissionPublicId,
+  users,
 }: {
   permissionPublicId: string
+  users: PickerUser[]
 }) {
   const action = grantPermissionAction.bind(null, permissionPublicId)
   const [state, formAction] = useActionState(action, idleActionState)
-  const formRef = useRef<HTMLFormElement>(null)
   const [effect, setEffect] = useState("allow")
+  const [selected, setSelected] = useState<PickerUser | null>(null)
+  // Remounting the picker (new key) clears its internal selection after a
+  // successful grant — a native form reset can't reach its React state.
+  const [pickerKey, setPickerKey] = useState(0)
+  const [handled, setHandled] = useState(state)
   const errors = state.fieldErrors ?? {}
 
-  useEffect(() => {
-    if (state.status === "success") formRef.current?.reset()
-  }, [state])
+  // Reset the form once per successful submission (adjust-state-during-render —
+  // the recommended alternative to a setState-in-effect).
+  if (state !== handled) {
+    setHandled(state)
+    if (state.status === "success") {
+      setSelected(null)
+      setEffect("allow")
+      setPickerKey((k) => k + 1)
+    }
+  }
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-3">
+    <form action={formAction} className="flex flex-col gap-3">
       <FormMessage state={state} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <FormField
           id="grant-email"
-          label="User email"
+          label="User"
           error={errors.email}
           className="flex-1"
         >
-          <Input
+          <UserPicker
+            key={pickerKey}
             id="grant-email"
             name="email"
-            type="email"
-            autoComplete="off"
-            placeholder="user@example.com"
-            required
+            users={users}
+            valueKey="email"
+            placeholder="Search by email or name…"
+            invalid={Boolean(errors.email)}
+            onSelect={setSelected}
           />
         </FormField>
 
@@ -67,7 +82,9 @@ export function GrantPermissionForm({
           </Select>
         </div>
 
-        <SubmitButton pendingText="Saving…">Add</SubmitButton>
+        <SubmitButton pendingText="Saving…" disabled={!selected}>
+          Add
+        </SubmitButton>
       </div>
     </form>
   )
