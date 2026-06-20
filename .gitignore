@@ -38,8 +38,9 @@ pnpm-debug.log*
 *.db-shm
 *.db-wal
 
-# user-uploaded content (avatars, etc.)
+# user-uploaded content (avatars, item media, etc.)
 /public/user-data/
+/public/inventory/
 
 # typescript
 *.tsbuildinfo

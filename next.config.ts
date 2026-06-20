@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
         source: "/user-data/:path*",
         headers: [{ key: "X-Content-Type-Options", value: "nosniff" }],
       },
+      {
+        // Inventory item media (images/videos) — same content-sniff protection.
+        source: "/inventory/:path*",
+        headers: [{ key: "X-Content-Type-Options", value: "nosniff" }],
+      },
     ]
   },
 }
