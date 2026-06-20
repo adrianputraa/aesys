@@ -1,5 +1,7 @@
 import "server-only"
 
+import { rmSync } from "node:fs"
+
 import { drizzle as drizzlePglite } from "drizzle-orm/pglite"
 import { migrate } from "drizzle-orm/pglite/migrator"
 
@@ -27,7 +29,26 @@ async function runInit(): Promise<void> {
 
   // Apply the Drizzle migrations to PGlite (tracked, so it's safe to re-run).
   const migrateDb = drizzlePglite(client, { schema })
-  await migrate(migrateDb, { migrationsFolder: "drizzle/app" })
+  try {
+    await migrate(migrateDb, { migrationsFolder: "drizzle/app" })
+  } catch (error) {
+    // PGlite is a single-process, file-backed database; an unclean shutdown
+    // (or a build that opened it concurrently) can corrupt its data dir, after
+    // which the first query fails. The demo DB is disposable, so reset it and
+    // ask for a restart rather than crashing cryptically on every boot.
+    await client.close().catch(() => {})
+    try {
+      rmSync(env.DEMO_DATABASE_DIR, { recursive: true, force: true })
+    } catch {
+      // best-effort; surface the clear message regardless
+    }
+    throw new Error(
+      `The embedded demo database at "${env.DEMO_DATABASE_DIR}" was unreadable ` +
+        `(likely corrupted by an unclean shutdown) and has been reset. Restart ` +
+        `\`pnpm dev\` to recreate and seed it.\nOriginal error: ` +
+        (error instanceof Error ? error.message : String(error))
+    )
+  }
 
   await seedDemoAccounts()
   console.log("[demo] embedded database ready")

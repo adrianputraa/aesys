@@ -9,6 +9,12 @@ export async function register() {
   // PGlite needs Node APIs; skip the edge runtime.
   if (process.env.NEXT_RUNTIME !== "nodejs") return
 
+  // Skip during `next build`. Build spawns several static-generation workers
+  // that would each open the embedded PGlite database concurrently against the
+  // same data dir — concurrent opens corrupt it. Migrating/seeding happens at
+  // server startup (`next dev` / `next start`) instead, never at build time.
+  if (process.env.NEXT_PHASE === "phase-production-build") return
+
   // Demo mode: migrate + seed demo accounts (no-op otherwise).
   const { initDemoDatabase } = await import("@/lib/db/app/demo")
   await initDemoDatabase()
@@ -16,4 +22,8 @@ export async function register() {
   // Always: seed the permission catalog (idempotent).
   const { seedPermissions } = await import("@/lib/db/app/seed-permissions")
   await seedPermissions()
+
+  // Always: seed the base currencies (idempotent).
+  const { seedCurrencies } = await import("@/lib/db/app/seed-currencies")
+  await seedCurrencies()
 }

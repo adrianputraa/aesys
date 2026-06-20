@@ -36,6 +36,18 @@ const globalForDb = globalThis as unknown as {
 
 function createDb(): AppDatabase {
   if (env.isDemoMode) {
+    // During `next build`, page modules are imported (their server data
+    // functions are NOT executed for dynamic routes), so we must not open the
+    // embedded PGlite database — build workers opening the same data dir
+    // concurrently can corrupt it. Return a stub that throws if actually used;
+    // a real client is created at runtime (`next dev` / `next start`).
+    if (process.env.NEXT_PHASE === "phase-production-build") {
+      return new Proxy({} as AppDatabase, {
+        get() {
+          throw new Error("Database is unavailable during the build phase.")
+        },
+      })
+    }
     // Both PGlite and its Drizzle driver are `require`d lazily so the WASM
     // engine is never loaded (or evaluated at build) outside demo mode.
     const nodeRequire = createRequire(import.meta.url)
